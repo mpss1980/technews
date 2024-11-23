@@ -22,8 +22,8 @@ class ListNewsAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         with(holder) {
             with(news[position]) {
-                binding.itemNewsTitle.text = title
-                binding.itemNewsContent.text = content
+                binding.itemNewsTitle.text = titulo
+                binding.itemNewsContent.text = texto
 
                 holder.itemView.setOnClickListener {
                     onTap(this)

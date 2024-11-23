@@ -4,6 +4,8 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.LinearLayout.VERTICAL
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import br.com.alura.technewsupdated.database.AppDatabase
 import br.com.alura.technewsupdated.databinding.ActivityListNewsBinding
@@ -11,13 +13,17 @@ import br.com.alura.technewsupdated.model.News
 import br.com.alura.technewsupdated.repositories.NewsRepository
 import br.com.alura.technewsupdated.ui.activity.extensions.showError
 import br.com.alura.technewsupdated.ui.recyclerview.adapter.ListNewsAdapter
+import br.com.alura.technewsupdated.ui.viewmodel.ListNewsViewModel
+import br.com.alura.technewsupdated.ui.viewmodel.factory.ListNewsViewModelFactory
 
 private const val APPBAR_TITLE = "Notícias"
 private const val LOAD_NEWS_FAILURE_MESSAGE = "Cannot load more news"
 
 class ListNewsActivity : AppCompatActivity() {
-    private val repository by lazy {
-        NewsRepository(AppDatabase.getInstance(this).newsDAO)
+    private val viewModel by lazy {
+        val factory =
+            ListNewsViewModelFactory(NewsRepository(AppDatabase.getInstance(this).newsDAO))
+        ViewModelProvider(this, factory)[ListNewsViewModel::class.java]
     }
 
     private val adapter by lazy {
@@ -69,12 +75,8 @@ class ListNewsActivity : AppCompatActivity() {
     }
 
     private fun fetchNews() {
-        repository.getAll(
-            onSuccess = {
-                adapter.updateNews(it)
-            }, onFailure = {
-                showError(LOAD_NEWS_FAILURE_MESSAGE)
-            }
-        )
+        viewModel.getAll().observe(this, Observer {
+            adapter.updateNews(it)
+        })
     }
 }

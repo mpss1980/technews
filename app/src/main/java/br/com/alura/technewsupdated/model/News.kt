@@ -7,6 +7,6 @@ import androidx.room.PrimaryKey
 data class News(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    val title: String = "",
-    val content: String = ""
+    val titulo: String = "",
+    val texto: String = ""
 )

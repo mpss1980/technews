@@ -1,5 +1,7 @@
 package br.com.alura.technewsupdated.repositories
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import br.com.alura.technewsupdated.asynctask.BaseAsyncTask
 import br.com.alura.technewsupdated.database.dao.NewsDAO
 import br.com.alura.technewsupdated.model.News
@@ -10,12 +12,16 @@ class NewsRepository(
     private val webClient: NewsWebClient = NewsWebClient()
 ) {
 
-    fun getAll(
-        onSuccess: (List<News>) -> Unit,
-        onFailure: (error: String?) -> Unit
-    ) {
-        getAllLocal(onSuccess)
-        getAllRemote(onSuccess, onFailure)
+    private val _news = MutableLiveData<List<News>>()
+
+    fun getAll(): LiveData<List<News>> {
+        getAllLocal(onSuccess = {
+            _news.value = it
+        })
+        getAllRemote(onSuccess = {
+            _news.value = it
+        }, onFailure = {})
+        return _news
     }
 
     fun getById(
@@ -65,7 +71,11 @@ class NewsRepository(
         )
     }
 
-    private fun removeRemote(news: News, onSuccess: () -> Unit, onFailure: (error: String?) -> Unit) {
+    private fun removeRemote(
+        news: News,
+        onSuccess: () -> Unit,
+        onFailure: (error: String?) -> Unit
+    ) {
         webClient.remove(news.id, onSuccess = {
             removeLocal(news, onSuccess)
         }, onFailure = onFailure)

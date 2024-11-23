@@ -62,9 +62,10 @@ class FormNewsActivity : AppCompatActivity() {
     }
 
     private fun fillForm() {
+        if (newsId <= 0) return
         repository.getById(newsId, onSuccess = { foundNew ->
-            binding.etFormNewsActivityTitle.setText(foundNew.title)
-            binding.etFormNewsActivityContent.setText(foundNew.content)
+            binding.etFormNewsActivityTitle.setText(foundNew.titulo)
+            binding.etFormNewsActivityContent.setText(foundNew.texto)
         })
     }
 

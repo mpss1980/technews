@@ -5,12 +5,14 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.lifecycle.ViewModelProvider
 import br.com.alura.technewsupdated.R
 import br.com.alura.technewsupdated.database.AppDatabase
 import br.com.alura.technewsupdated.databinding.ActivityNewsViewerBinding
 import br.com.alura.technewsupdated.model.News
 import br.com.alura.technewsupdated.repositories.NewsRepository
 import br.com.alura.technewsupdated.ui.activity.extensions.showError
+import br.com.alura.technewsupdated.ui.viewmodel.ListNewsViewModel
 
 private const val NOT_FOUND_NEWS = "Notícia não encontrada"
 private const val APPBAR_TITLE = "Notícia"
@@ -81,8 +83,8 @@ class NewsViewerActivity : AppCompatActivity() {
     }
 
     private fun fillFields(news: News) {
-        binding.tvNewsViewerActivityTitle.text = news.title
-        binding.tvNewsViewerActivityText.text = news.content
+        binding.tvNewsViewerActivityTitle.text = news.titulo
+        binding.tvNewsViewerActivityText.text = news.texto
     }
 
     private fun checkNewsId() {
