@@ -1,4 +1,9 @@
 <resources>
-    <string name="app_name">TechNewsUpdated</string>
+    <string name="app_name">Tech News</string>
     <string name="add_news_button">Add news button</string>
+    <string name="edit">Editar</string>
+    <string name="remove">Remover</string>
+    <string name="title">Título</string>
+    <string name="type_your_text">Escreva seu texto…</string>
+    <string name="save">Salvar</string>
 </resources>

@@ -2,7 +2,7 @@ package br.com.alura.technewsupdated.repositories
 
 import br.com.alura.technewsupdated.asynctask.BaseAsyncTask
 import br.com.alura.technewsupdated.database.dao.NewsDAO
-import br.com.alura.technewsupdated.model.New
+import br.com.alura.technewsupdated.model.News
 import br.com.alura.technewsupdated.retrofit.webclient.NewsWebClient
 
 class NewsRepository(
@@ -11,7 +11,7 @@ class NewsRepository(
 ) {
 
     fun getAll(
-        onSuccess: (List<New>) -> Unit,
+        onSuccess: (List<News>) -> Unit,
         onFailure: (error: String?) -> Unit
     ) {
         getAllLocal(onSuccess)
@@ -20,7 +20,7 @@ class NewsRepository(
 
     fun getById(
         id: Long,
-        onSuccess: (foundId: New) -> Unit
+        onSuccess: (foundId: News) -> Unit
     ) {
         BaseAsyncTask(onExecute = {
             dao.getById(id)!!
@@ -28,36 +28,36 @@ class NewsRepository(
     }
 
     fun save(
-        new: New,
-        onSuccess: (new: New) -> Unit,
+        news: News,
+        onSuccess: (news: News) -> Unit,
         onFailure: (error: String?) -> Unit
     ) {
-        saveRemote(new, onSuccess, onFailure)
+        saveRemote(news, onSuccess, onFailure)
     }
 
     fun remove(
-        new: New,
+        news: News,
         onSuccess: () -> Unit,
         onFailure: (error: String?) -> Unit
     ) {
-        removeRemote(new, onSuccess, onFailure)
+        removeRemote(news, onSuccess, onFailure)
     }
 
     fun edit(
-        new: New,
-        onSuccess: (editedNew: New) -> Unit,
+        news: News,
+        onSuccess: (editedNews: News) -> Unit,
         onFailure: (error: String?) -> Unit
     ) {
-        editRemote(new, onSuccess, onFailure)
+        editRemote(news, onSuccess, onFailure)
     }
 
     private fun editRemote(
-        new: New,
-        onSuccess: (editedNew: New) -> Unit,
+        news: News,
+        onSuccess: (editedNews: News) -> Unit,
         onFailure: (error: String?) -> Unit
     ) {
         webClient.edit(
-            new.id, new, onSuccess = { editedNew ->
+            news.id, news, onSuccess = { editedNew ->
                 editedNew?.let {
                     saveLocal(editedNew, onSuccess)
                 }
@@ -65,27 +65,27 @@ class NewsRepository(
         )
     }
 
-    private fun removeRemote(new: New, onSuccess: () -> Unit, onFailure: (error: String?) -> Unit) {
-        webClient.remove(new.id, onSuccess = {
-            removeLocal(new, onSuccess)
+    private fun removeRemote(news: News, onSuccess: () -> Unit, onFailure: (error: String?) -> Unit) {
+        webClient.remove(news.id, onSuccess = {
+            removeLocal(news, onSuccess)
         }, onFailure = onFailure)
     }
 
-    private fun removeLocal(new: New, onSuccess: () -> Unit) {
+    private fun removeLocal(news: News, onSuccess: () -> Unit) {
         BaseAsyncTask(onExecute = {
-            dao.remove(new)
+            dao.remove(news)
         }, onFinished = {
             onSuccess()
         }).execute()
     }
 
     private fun saveRemote(
-        new: New,
-        onSuccess: (new: New) -> Unit,
+        news: News,
+        onSuccess: (news: News) -> Unit,
         onFailure: (error: String?) -> Unit
     ) {
         webClient.save(
-            new,
+            news,
             onSuccess = {
                 it?.let { savedNew ->
                     saveLocal(savedNew, onSuccess)
@@ -94,7 +94,7 @@ class NewsRepository(
         )
     }
 
-    private fun getAllRemote(onSuccess: (List<New>) -> Unit, onFailure: (error: String?) -> Unit) {
+    private fun getAllRemote(onSuccess: (List<News>) -> Unit, onFailure: (error: String?) -> Unit) {
         webClient.getAll(
             onSuccess = { currentNews ->
                 currentNews?.let {
@@ -104,15 +104,15 @@ class NewsRepository(
         )
     }
 
-    private fun getAllLocal(onSuccess: (List<New>) -> Unit) {
+    private fun getAllLocal(onSuccess: (List<News>) -> Unit) {
         BaseAsyncTask(onExecute = {
             dao.getAll()
         }, onFinished = onSuccess).execute()
     }
 
     private fun saveLocal(
-        news: List<New>,
-        onSuccess: (currentNews: List<New>) -> Unit
+        news: List<News>,
+        onSuccess: (currentNews: List<News>) -> Unit
     ) {
         BaseAsyncTask(onExecute = {
             dao.save(news)
@@ -121,12 +121,12 @@ class NewsRepository(
     }
 
     private fun saveLocal(
-        new: New,
-        onSuccess: (currentNew: New) -> Unit
+        news: News,
+        onSuccess: (currentNews: News) -> Unit
     ) {
         BaseAsyncTask(onExecute = {
-            dao.save(new)
-            dao.getById(new.id)
+            dao.save(news)
+            dao.getById(news.id)
         }, onFinished = { foundNew ->
             foundNew?.let {
                 onSuccess(it)

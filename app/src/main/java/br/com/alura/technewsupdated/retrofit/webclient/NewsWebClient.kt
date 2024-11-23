@@ -1,6 +1,6 @@
 package br.com.alura.technewsupdated.retrofit.webclient
 
-import br.com.alura.technewsupdated.model.New
+import br.com.alura.technewsupdated.model.News
 import br.com.alura.technewsupdated.retrofit.AppRetrofit
 import br.com.alura.technewsupdated.retrofit.service.NewsService
 import retrofit2.Call
@@ -14,7 +14,7 @@ class NewsWebClient(
 ) {
 
     fun getAll(
-        onSuccess: (currentNews: List<New>?) -> Unit,
+        onSuccess: (currentNews: List<News>?) -> Unit,
         onFailure: (error: String?) -> Unit
     ) {
         doRequest(
@@ -25,20 +25,20 @@ class NewsWebClient(
     }
 
     fun save(
-        new: New,
-        onSuccess: (currentNew: New?) -> Unit,
+        news: News,
+        onSuccess: (currentNews: News?) -> Unit,
         onFailure: (error: String?) -> Unit
     ) {
-        doRequest(service.save(new), onSuccess, onFailure)
+        doRequest(service.save(news), onSuccess, onFailure)
     }
 
     fun edit(
         id: Long,
-        new: New,
-        onSuccess: (currentNew: New?) -> Unit,
+        news: News,
+        onSuccess: (currentNews: News?) -> Unit,
         onFailure: (error: String?) -> Unit
     ) {
-        doRequest(service.edit(id, new), onSuccess, onFailure)
+        doRequest(service.edit(id, news), onSuccess, onFailure)
     }
 
     fun remove(

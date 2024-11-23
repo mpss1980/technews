@@ -5,15 +5,14 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.LinearLayout.VERTICAL
 import androidx.recyclerview.widget.DividerItemDecoration
-import br.com.alura.technewsupdated.R
 import br.com.alura.technewsupdated.database.AppDatabase
-import br.com.alura.technewsupdated.model.New
+import br.com.alura.technewsupdated.databinding.ActivityListNewsBinding
+import br.com.alura.technewsupdated.model.News
 import br.com.alura.technewsupdated.repositories.NewsRepository
 import br.com.alura.technewsupdated.ui.activity.extensions.showError
 import br.com.alura.technewsupdated.ui.recyclerview.adapter.ListNewsAdapter
-import kotlinx.android.synthetic.main.activity_list_news.fab_save_news
-import kotlinx.android.synthetic.main.activity_list_news.rv_list_news
 
+private const val APPBAR_TITLE = "Notícias"
 private const val LOAD_NEWS_FAILURE_MESSAGE = "Cannot load more news"
 
 class ListNewsActivity : AppCompatActivity() {
@@ -22,12 +21,16 @@ class ListNewsActivity : AppCompatActivity() {
     }
 
     private val adapter by lazy {
-        ListNewsAdapter(context = this)
+        ListNewsAdapter()
     }
+
+    private lateinit var binding: ActivityListNewsBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_list_news)
+        binding = ActivityListNewsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        title = APPBAR_TITLE
         configureRecyclerView()
         configureFabAddNew()
     }
@@ -39,13 +42,13 @@ class ListNewsActivity : AppCompatActivity() {
 
     private fun configureRecyclerView() {
         val divider = DividerItemDecoration(this, VERTICAL)
-        rv_list_news.addItemDecoration(divider)
-        rv_list_news.adapter = adapter
+        binding.rvListNews.addItemDecoration(divider)
+        binding.rvListNews.adapter = adapter
         configureAdapter()
     }
 
     private fun configureFabAddNew() {
-        fab_save_news.setOnClickListener {
+        binding.fabSaveNews.setOnClickListener {
             openCreationModeForm()
         }
     }
@@ -54,7 +57,7 @@ class ListNewsActivity : AppCompatActivity() {
         adapter.onTap = this::openNewsViewer
     }
 
-    private fun openNewsViewer(it: New) {
+    private fun openNewsViewer(it: News) {
         val intent = Intent(this, NewsViewerActivity::class.java)
         intent.putExtra(NEWS_ID_KEY, it.id)
         startActivity(intent)
