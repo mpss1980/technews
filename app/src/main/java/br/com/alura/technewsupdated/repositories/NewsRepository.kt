@@ -12,15 +12,14 @@ class NewsRepository(
     private val webClient: NewsWebClient = NewsWebClient()
 ) {
 
-    private val _news = MutableLiveData<List<News>>()
+    private val _news = MutableLiveData<Resource<List<News>>>()
 
-    fun getAll(): LiveData<List<News>> {
-        getAllLocal(onSuccess = {
-            _news.value = it
+    fun getAll(): LiveData<Resource<List<News>>> {
+        val updateListNews: (List<News>) -> Unit = { _news.value = Resource(it) }
+        getAllLocal(onSuccess = updateListNews)
+        getAllRemote(onSuccess = updateListNews, onFailure = {
+            _news.value = Resource(_news.value?.data, error = it)
         })
-        getAllRemote(onSuccess = {
-            _news.value = it
-        }, onFailure = {})
         return _news
     }
 
