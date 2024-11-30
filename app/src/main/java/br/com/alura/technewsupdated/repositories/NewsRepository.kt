@@ -1,5 +1,6 @@
 package br.com.alura.technewsupdated.repositories
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import br.com.alura.technewsupdated.asynctask.BaseAsyncTask
@@ -15,9 +16,9 @@ class NewsRepository(
     private val _news = MutableLiveData<Resource<List<News>>>()
 
     fun getAll(): LiveData<Resource<List<News>>> {
-        val updateListNews: (List<News>) -> Unit = { _news.value = Resource(it) }
-        getAllLocal(onSuccess = updateListNews)
-        getAllRemote(onSuccess = updateListNews, onFailure = {
+        val onSuccess: (List<News>) -> Unit = { _news.value = Resource(it) }
+        getAllLocal(onSuccess = onSuccess)
+        getAllRemote(onSuccess = onSuccess, onFailure = {
             _news.value = Resource(_news.value?.data, error = it)
         })
         return _news
@@ -25,35 +26,50 @@ class NewsRepository(
 
     fun getById(
         id: Long,
-        onSuccess: (foundId: News) -> Unit
-    ) {
+    ): LiveData<News?> {
+        val liveData = MutableLiveData<News?>()
         BaseAsyncTask(onExecute = {
             dao.getById(id)!!
-        }, onFinished = onSuccess).execute()
+        }, onFinished = {
+            liveData.value = it
+        }).execute()
+        return liveData
     }
 
     fun save(
         news: News,
-        onSuccess: (news: News) -> Unit,
-        onFailure: (error: String?) -> Unit
-    ) {
-        saveRemote(news, onSuccess, onFailure)
+    ): LiveData<Resource<Void?>> {
+        val liveData = MutableLiveData<Resource<Void?>>()
+        saveRemote(news, onSuccess = {
+            liveData.value = Resource(null)
+        }, onFailure = {
+            liveData.value = Resource(null, error = it)
+        })
+        return liveData
     }
 
     fun remove(
         news: News,
-        onSuccess: () -> Unit,
-        onFailure: (error: String?) -> Unit
-    ) {
-        removeRemote(news, onSuccess, onFailure)
+    ) : LiveData<Resource<Void?>> {
+        val liveData = MutableLiveData<Resource<Void?>>()
+        removeRemote(news, onSuccess = {
+            liveData.value = Resource(null)
+        }, onFailure = {
+            liveData.value = Resource(null, error = it)
+        })
+        return liveData
     }
 
     fun edit(
         news: News,
-        onSuccess: (editedNews: News) -> Unit,
-        onFailure: (error: String?) -> Unit
-    ) {
-        editRemote(news, onSuccess, onFailure)
+    ): LiveData<Resource<Void?>> {
+        val liveData = MutableLiveData<Resource<Void?>>()
+        editRemote(news, onSuccess = {
+            liveData.value = Resource(null)
+        }, onFailure = {
+            liveData.value = Resource(null, error = it)
+        })
+        return liveData
     }
 
     private fun editRemote(
@@ -108,6 +124,7 @@ class NewsRepository(
             onSuccess = { currentNews ->
                 currentNews?.let {
                     saveLocal(currentNews, onSuccess)
+                    onSuccess(currentNews)
                 }
             }, onFailure = onFailure
         )

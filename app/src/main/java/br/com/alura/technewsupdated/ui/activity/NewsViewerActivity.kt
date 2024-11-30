@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import br.com.alura.technewsupdated.R
 import br.com.alura.technewsupdated.database.AppDatabase
@@ -13,18 +14,27 @@ import br.com.alura.technewsupdated.model.News
 import br.com.alura.technewsupdated.repositories.NewsRepository
 import br.com.alura.technewsupdated.ui.activity.extensions.showError
 import br.com.alura.technewsupdated.ui.viewmodel.ListNewsViewModel
+import br.com.alura.technewsupdated.ui.viewmodel.NewsViewerViewModel
+import br.com.alura.technewsupdated.ui.viewmodel.factory.ListNewsViewModelFactory
+import br.com.alura.technewsupdated.ui.viewmodel.factory.NewsViewerViewModelFactory
 
 private const val NOT_FOUND_NEWS = "Notícia não encontrada"
 private const val APPBAR_TITLE = "Notícia"
 private const val FAILURE_ON_REMOVE_MSG = "Não foi possível remover notícia"
+
 class NewsViewerActivity : AppCompatActivity() {
 
     private val newId: Long by lazy {
         intent.getLongExtra(NEWS_ID_KEY, 0)
     }
 
-    private val repository by lazy {
-        NewsRepository(AppDatabase.getInstance(this).newsDAO)
+    private val viewModel by lazy {
+        val factory =
+            NewsViewerViewModelFactory(
+                newId,
+                NewsRepository(AppDatabase.getInstance(this).newsDAO),
+            )
+        ViewModelProvider(this, factory)[NewsViewerViewModel::class.java]
     }
 
     private lateinit var binding: ActivityNewsViewerBinding
@@ -59,10 +69,9 @@ class NewsViewerActivity : AppCompatActivity() {
 
     private fun removeItem() {
         if (::news.isInitialized) {
-            repository.remove(news, onSuccess = {
+            viewModel.remove().observe(this, Observer { resource ->
+                resource?.error?.let { showError(FAILURE_ON_REMOVE_MSG) }
                 finish()
-            }, onFailure = {
-                showError(FAILURE_ON_REMOVE_MSG)
             })
         }
     }
@@ -74,8 +83,8 @@ class NewsViewerActivity : AppCompatActivity() {
     }
 
     private fun findSelectedNew() {
-        repository.getById(newId, onSuccess = {foundNew ->
-            foundNew.let {
+        viewModel.getById().observe(this, Observer { news ->
+            news?.let {
                 this.news = it
                 fillFields(it)
             }
@@ -88,9 +97,9 @@ class NewsViewerActivity : AppCompatActivity() {
     }
 
     private fun checkNewsId() {
-       if (newId == 0L) {
-           showError(NOT_FOUND_NEWS)
-           finish()
-       }
+        if (newId == 0L) {
+            showError(NOT_FOUND_NEWS)
+            finish()
+        }
     }
 }

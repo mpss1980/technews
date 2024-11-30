@@ -11,8 +11,6 @@ import br.com.alura.technewsupdated.database.AppDatabase
 import br.com.alura.technewsupdated.databinding.ActivityListNewsBinding
 import br.com.alura.technewsupdated.model.News
 import br.com.alura.technewsupdated.repositories.NewsRepository
-import br.com.alura.technewsupdated.repositories.ResourceError
-import br.com.alura.technewsupdated.repositories.ResourceSuccess
 import br.com.alura.technewsupdated.ui.activity.extensions.showError
 import br.com.alura.technewsupdated.ui.recyclerview.adapter.ListNewsAdapter
 import br.com.alura.technewsupdated.ui.viewmodel.ListNewsViewModel
@@ -78,17 +76,8 @@ class ListNewsActivity : AppCompatActivity() {
 
     private fun fetchNews() {
         viewModel.getAll().observe(this, Observer { resource ->
-            when (resource) {
-                is ResourceSuccess -> {
-                    resource.data?.let { adapter.updateNews(it) }
-                }
-
-                is ResourceError -> {
-                    resource.error?.let {
-                        showError(LOAD_NEWS_FAILURE_MESSAGE)
-                    }
-                }
-            }
+            resource.data?.let { adapter.updateNews(it) }
+            resource.error?.let { showError(LOAD_NEWS_FAILURE_MESSAGE) }
         })
     }
 }
