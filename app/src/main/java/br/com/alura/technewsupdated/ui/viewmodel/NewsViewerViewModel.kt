@@ -8,14 +8,11 @@ import br.com.alura.technewsupdated.repositories.NewsRepository
 import br.com.alura.technewsupdated.repositories.Resource
 
 class NewsViewerViewModel(
-    private val id: Long,
+    id: Long,
     private val repository: NewsRepository
 ) : ViewModel() {
 
-    private val foundNews = getById()
-
-    fun getById(): LiveData<News?> =
-        repository.getById(id)
+    val foundNews =  repository.getById(id)
 
     fun remove(): LiveData<Resource<Void?>> {
         return foundNews.value?.run { repository.remove(this) }

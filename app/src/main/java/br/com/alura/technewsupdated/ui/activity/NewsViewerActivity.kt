@@ -79,7 +79,7 @@ class NewsViewerActivity : AppCompatActivity() {
     }
 
     private fun findSelectedNew() {
-        viewModel.getById().observe(this, Observer { news ->
+        viewModel.foundNews.observe(this, Observer { news ->
             news?.let {
                 this.news = it
                 fillFields(it)
