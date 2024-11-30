@@ -47,10 +47,6 @@ class NewsViewerActivity : AppCompatActivity() {
         setContentView(binding.root)
         title = APPBAR_TITLE
         checkNewsId()
-    }
-
-    override fun onResume() {
-        super.onResume()
         findSelectedNew()
     }
 

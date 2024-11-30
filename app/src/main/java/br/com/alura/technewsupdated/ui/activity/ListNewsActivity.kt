@@ -39,10 +39,6 @@ class ListNewsActivity : AppCompatActivity() {
         title = APPBAR_TITLE
         configureRecyclerView()
         configureFabAddNew()
-    }
-
-    override fun onResume() {
-        super.onResume()
         fetchNews()
     }
 

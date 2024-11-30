@@ -2,7 +2,9 @@ package br.com.alura.technewsupdated.repositories
 
 import android.util.Log
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import br.com.alura.technewsupdated.asynctask.BaseAsyncTask
 import br.com.alura.technewsupdated.database.dao.NewsDAO
 import br.com.alura.technewsupdated.model.News
@@ -12,28 +14,34 @@ class NewsRepository(
     private val dao: NewsDAO,
     private val webClient: NewsWebClient = NewsWebClient()
 ) {
-
-    private val _news = MutableLiveData<Resource<List<News>>>()
+    private val _newsMediator = MediatorLiveData<Resource<List<News>>>()
 
     fun getAll(): LiveData<Resource<List<News>>> {
-        val onSuccess: (List<News>) -> Unit = { _news.value = Resource(it) }
-        getAllLocal(onSuccess = onSuccess)
-        getAllRemote(onSuccess = onSuccess, onFailure = {
-            _news.value = Resource(_news.value?.data, error = it)
+        _newsMediator.addSource(getAllLocal(), Observer {
+            _newsMediator.value = Resource(it)
         })
-        return _news
+
+        val news = MutableLiveData<Resource<List<News>>>()
+        _newsMediator.addSource(news) {failedResource ->
+            val currentResource = _newsMediator.value
+            val newResource = if (currentResource != null) {
+                Resource(currentResource.data, failedResource?.error)
+            } else {
+                failedResource
+            }
+            _newsMediator.value = newResource
+        }
+
+        getAllRemote(onFailure = {
+            news.value = Resource(news.value?.data, error = it)
+        })
+        return _newsMediator
     }
 
     fun getById(
         id: Long,
     ): LiveData<News?> {
-        val liveData = MutableLiveData<News?>()
-        BaseAsyncTask(onExecute = {
-            dao.getById(id)!!
-        }, onFinished = {
-            liveData.value = it
-        }).execute()
-        return liveData
+        return dao.getById(id)
     }
 
     fun save(
@@ -50,7 +58,7 @@ class NewsRepository(
 
     fun remove(
         news: News,
-    ) : LiveData<Resource<Void?>> {
+    ): LiveData<Resource<Void?>> {
         val liveData = MutableLiveData<Resource<Void?>>()
         removeRemote(news, onSuccess = {
             liveData.value = Resource(null)
@@ -74,7 +82,7 @@ class NewsRepository(
 
     private fun editRemote(
         news: News,
-        onSuccess: (editedNews: News) -> Unit,
+        onSuccess: () -> Unit,
         onFailure: (error: String?) -> Unit
     ) {
         webClient.edit(
@@ -106,7 +114,7 @@ class NewsRepository(
 
     private fun saveRemote(
         news: News,
-        onSuccess: (news: News) -> Unit,
+        onSuccess: () -> Unit,
         onFailure: (error: String?) -> Unit
     ) {
         webClient.save(
@@ -119,44 +127,36 @@ class NewsRepository(
         )
     }
 
-    private fun getAllRemote(onSuccess: (List<News>) -> Unit, onFailure: (error: String?) -> Unit) {
+    private fun getAllRemote(onFailure: (error: String?) -> Unit) {
         webClient.getAll(
             onSuccess = { currentNews ->
                 currentNews?.let {
-                    saveLocal(currentNews, onSuccess)
-                    onSuccess(currentNews)
+                    saveLocal(currentNews)
                 }
             }, onFailure = onFailure
         )
     }
 
-    private fun getAllLocal(onSuccess: (List<News>) -> Unit) {
-        BaseAsyncTask(onExecute = {
-            dao.getAll()
-        }, onFinished = onSuccess).execute()
+    private fun getAllLocal(): LiveData<List<News>> {
+        return dao.getAll()
     }
 
     private fun saveLocal(
         news: List<News>,
-        onSuccess: (currentNews: List<News>) -> Unit
     ) {
         BaseAsyncTask(onExecute = {
             dao.save(news)
-            dao.getAll()
-        }, onFinished = onSuccess).execute()
+        }, onFinished = {}).execute()
     }
 
     private fun saveLocal(
         news: News,
-        onSuccess: (currentNews: News) -> Unit
+        onSuccess: () -> Unit
     ) {
         BaseAsyncTask(onExecute = {
             dao.save(news)
-            dao.getById(news.id)
-        }, onFinished = { foundNew ->
-            foundNew?.let {
-                onSuccess(it)
-            }
+        }, onFinished = {
+            onSuccess()
         }).execute()
     }
 }

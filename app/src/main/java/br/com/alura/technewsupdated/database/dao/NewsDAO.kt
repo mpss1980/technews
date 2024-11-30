@@ -1,5 +1,6 @@
 package br.com.alura.technewsupdated.database.dao
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -11,10 +12,10 @@ import br.com.alura.technewsupdated.model.News
 interface NewsDAO {
 
     @Query("SELECT * FROM News ORDER BY id DESC")
-    fun getAll(): List<News>
+    fun getAll(): LiveData<List<News>>
 
     @Query("SELECT * FROM News WHERE id = :id")
-    fun getById(id: Long): News?
+    fun getById(id: Long): LiveData<News?>
 
     @Insert(onConflict = REPLACE)
     fun save(news: News)
