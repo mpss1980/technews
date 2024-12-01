@@ -5,31 +5,23 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import br.com.alura.technewsupdated.R
-import br.com.alura.technewsupdated.database.AppDatabase
 import br.com.alura.technewsupdated.databinding.ActivityFormNewsBinding
 import br.com.alura.technewsupdated.model.News
-import br.com.alura.technewsupdated.repositories.NewsRepository
 import br.com.alura.technewsupdated.ui.activity.extensions.showError
 import br.com.alura.technewsupdated.ui.viewmodel.FormNewsViewModel
-import br.com.alura.technewsupdated.ui.viewmodel.factory.FormNewsViewModelFactory
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 private const val APPBAR_EDIT_TITLE = "Editando notícia"
 private const val APPBAR_CREATE_TITLE = "Criando notícia"
 private const val ERROR_ON_SAVE = "Não foi possível salvar notícia"
 
 class FormNewsActivity : AppCompatActivity() {
-
     private val newsId: Long by lazy {
         intent.getLongExtra(NEWS_ID_KEY, 0)
     }
 
-    private val viewModel by lazy {
-        val factory =
-            FormNewsViewModelFactory(NewsRepository(AppDatabase.getInstance(this).newsDAO))
-        ViewModelProvider(this, factory)[FormNewsViewModel::class.java]
-    }
+    private val viewModel:FormNewsViewModel by viewModel()
 
     private lateinit var binding: ActivityFormNewsBinding
 

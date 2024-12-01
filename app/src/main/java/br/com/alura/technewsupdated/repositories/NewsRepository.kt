@@ -12,7 +12,7 @@ import br.com.alura.technewsupdated.retrofit.webclient.NewsWebClient
 
 class NewsRepository(
     private val dao: NewsDAO,
-    private val webClient: NewsWebClient = NewsWebClient()
+    private val webClient: NewsWebClient
 ) {
     private val _newsMediator = MediatorLiveData<Resource<List<News>>>()
 

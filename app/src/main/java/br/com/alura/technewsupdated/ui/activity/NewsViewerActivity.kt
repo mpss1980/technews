@@ -17,6 +17,9 @@ import br.com.alura.technewsupdated.ui.viewmodel.ListNewsViewModel
 import br.com.alura.technewsupdated.ui.viewmodel.NewsViewerViewModel
 import br.com.alura.technewsupdated.ui.viewmodel.factory.ListNewsViewModelFactory
 import br.com.alura.technewsupdated.ui.viewmodel.factory.NewsViewerViewModelFactory
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 
 private const val NOT_FOUND_NEWS = "Notícia não encontrada"
 private const val APPBAR_TITLE = "Notícia"
@@ -28,13 +31,8 @@ class NewsViewerActivity : AppCompatActivity() {
         intent.getLongExtra(NEWS_ID_KEY, 0)
     }
 
-    private val viewModel by lazy {
-        val factory =
-            NewsViewerViewModelFactory(
-                newId,
-                NewsRepository(AppDatabase.getInstance(this).newsDAO),
-            )
-        ViewModelProvider(this, factory)[NewsViewerViewModel::class.java]
+    private val viewModel:NewsViewerViewModel by viewModel {
+        parametersOf(newId)
     }
 
     private lateinit var binding: ActivityNewsViewerBinding
